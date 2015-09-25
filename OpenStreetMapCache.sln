@@ -1,0 +1,17 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenStreetMapCache", "OpenStreetMapCache.csproj", "{602B84C6-8D71-43BC-9E9C-28DB24B5B185}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{602B84C6-8D71-43BC-9E9C-28DB24B5B185}.Debug|x86.ActiveCfg = Debug|x86
+		{602B84C6-8D71-43BC-9E9C-28DB24B5B185}.Debug|x86.Build.0 = Debug|x86
+		{602B84C6-8D71-43BC-9E9C-28DB24B5B185}.Release|x86.ActiveCfg = Release|x86
+		{602B84C6-8D71-43BC-9E9C-28DB24B5B185}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+EndGlobal
