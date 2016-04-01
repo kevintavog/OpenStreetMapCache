@@ -2,11 +2,13 @@
 using NLog;
 using System.Collections.Generic;
 using System;
+using OpenStreetMapCache.Lookup;
 
 namespace OpenStreetMapCache.WebServer
 {
     abstract public class BaseWebServerModule : NancyModule
     {
+        protected static readonly PersistentCachingReverseLookupProvider lookupProvider = new PersistentCachingReverseLookupProvider();
         static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         protected BaseWebServerModule(string modulePath) : base(modulePath)

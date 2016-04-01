@@ -1,13 +1,13 @@
 ﻿using System;
-using OpenStreetMapCache.Lookup;
+using Nancy;
 
 namespace OpenStreetMapCache.WebServer.Api
 {
-    public class ReverseModule : BaseWebServerModule
+    public class FindNearestModule : BaseWebServerModule
     {
-        public ReverseModule() : base("/nominatim/v1")
+        public FindNearestModule()  : base("/cache")
         {
-            Get["/reverse"] = p =>
+            Get["/find-nearest"] = p =>
             {
                 string latStr = Request.Query.lat.HasValue ? Request.Query.lat : "";
                 string lonStr = Request.Query.lon.HasValue ? Request.Query.lon : "";
@@ -20,7 +20,17 @@ namespace OpenStreetMapCache.WebServer.Api
                     return "";
                 }
 
-                return lookupProvider.Lookup(lat, lon);
+                var ret = lookupProvider.FindNearest(lat, lon);
+                if (ret == null)
+                    return "{}";
+
+                return Response.AsJson(new {
+                    MatchedLocation = new {
+                        Latitude = ret.Latitude,
+                        Longitude = ret.Longitude
+                    },
+                    Placename = ret.Placename
+                });
             };
         }
     }

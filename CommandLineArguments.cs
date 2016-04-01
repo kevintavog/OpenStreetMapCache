@@ -10,4 +10,3 @@ namespace OpenStreetMapCache
         public bool RunAsService { get; set; }
     }
 }
-
