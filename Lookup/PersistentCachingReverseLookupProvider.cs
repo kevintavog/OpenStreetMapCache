@@ -101,7 +101,13 @@ namespace OpenStreetMapCache.Lookup
                         {
                             while (reader.Read())
                             {
-                                return new StoredPlacename { GeoLocation = reader.GetString(0), Placename = reader.GetString(1) };
+                                var geoLocation = reader.GetString(0);
+                                var placename = reader.GetString(1);
+
+                                if (!placename.Contains("apiStatusCode"))
+                                    return new StoredPlacename { GeoLocation = geoLocation, Placename = placename };
+                                else
+                                    Console.WriteLine($"Ignoring '{placename}'");
                             }
                         }
                     }
@@ -120,7 +126,12 @@ namespace OpenStreetMapCache.Lookup
         {
             if (String.IsNullOrWhiteSpace(data))
             {
-                logger.Warn($"Ignoring empty data for '{key}'");
+                logger.Warn($"Not storing empty data for '{key}'");
+                return;
+            }
+            if (data.Contains("apiStatusCode"))
+            {
+                logger.Warn($"Not storing api failure for '{key}': '{data}'");
                 return;
             }
 
@@ -133,7 +144,7 @@ namespace OpenStreetMapCache.Lookup
                     using (var command = connection.CreateCommand())
                     {
                         command.CommandType = System.Data.CommandType.Text;
-                        command.CommandText = "INSERT INTO LocationCache (geoLocation, fullPlacename) VALUES(@key, @data)";
+                        command.CommandText = "INSERT OR REPLACE INTO LocationCache (geoLocation, fullPlacename) VALUES(@key, @data)";
                         command.Parameters.AddWithValue("@key", key);
                         command.Parameters.AddWithValue("@data", data);
                         command.ExecuteNonQuery();
