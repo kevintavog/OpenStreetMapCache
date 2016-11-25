@@ -8,7 +8,7 @@ namespace OpenStreetMapCache.WebServer
 {
     abstract public class BaseWebServerModule : NancyModule
     {
-        protected static readonly PersistentCachingReverseLookupProvider lookupProvider = new PersistentCachingReverseLookupProvider();
+        protected static readonly IReverseLookupProvider lookupProvider = new PersistentLookupProvider();
         static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         protected BaseWebServerModule(string modulePath) : base(modulePath)

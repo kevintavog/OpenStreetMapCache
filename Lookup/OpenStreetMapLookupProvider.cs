@@ -97,6 +97,11 @@ namespace OpenStreetMapCache.Lookup
 
             return null;
         }
-    }
+
+		public FindNearestResult FindNearest(double latitude, double longitude)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
 

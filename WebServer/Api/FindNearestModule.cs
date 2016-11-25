@@ -9,22 +9,29 @@ namespace OpenStreetMapCache.WebServer.Api
         {
             Get["/find-nearest"] = p =>
             {
-                string latStr = Request.Query.lat.HasValue ? Request.Query.lat : "";
+				var logger = Context.GetLogger();
+    
+				string latStr = Request.Query.lat.HasValue ? Request.Query.lat : "";
                 string lonStr = Request.Query.lon.HasValue ? Request.Query.lon : "";
 
                 double lat, lon;
                 if (!Double.TryParse(latStr, out lat) || !Double.TryParse(lonStr, out lon))
                 {
-                    var logger = Context.GetLogger();
                     logger.Set("failedParsingLatOrLong", $"{latStr},{lonStr}");
                     return "";
                 }
 
                 var ret = lookupProvider.FindNearest(lat, lon);
-                if (ret == null)
-                    return "{}";
+				if (ret == null)
+				{
+					logger.Set("match", false);
+					return "{}";
+				}
 
-                return Response.AsJson(new {
+				logger.Set("match", true);
+				logger.Set("Latitude", ret.Latitude);
+				logger.Set("Longitude", ret.Longitude);
+    	        return Response.AsJson(new {
                     MatchedLocation = new {
                         Latitude = ret.Latitude,
                         Longitude = ret.Longitude

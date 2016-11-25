@@ -3,17 +3,10 @@ using System.IO;
 using System.Data.SQLite;
 using NLog;
 using Rangic.Utilities.Os;
-
+using System.Collections.Generic;
 
 namespace OpenStreetMapCache.Lookup
 {
-    public class FindNearestResult
-    {
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
-        public string Placename { get; set; }
-    }
-    
     public class PersistentCachingReverseLookupProvider : IReverseLookupProvider
     {
         static private readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -122,7 +115,40 @@ namespace OpenStreetMapCache.Lookup
             return null;
         }
 
-        static private void StoreDataForKey(string key, string data)
+		static public IEnumerable<FindNearestResult> GetAllData()
+		{
+			using (var connection = new SQLiteConnection(("Data Source=" + DatabasePath)))
+			{
+				EnsureExists(connection);
+
+				connection.Open();
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandType = System.Data.CommandType.Text;
+					command.CommandText = $"SELECT geoLocation,fullPlacename FROM LocationCache";
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							var geoLocation = reader.GetString(0);
+							var placename = reader.GetString(1);
+
+							var tokens = geoLocation.Split(',');
+							if (tokens.Length == 2)
+							{
+								double matchedLatitude, matchedLongitude;
+								if (Double.TryParse(tokens[0], out matchedLatitude) && Double.TryParse(tokens[1], out matchedLongitude))
+								{
+									yield return new FindNearestResult { Latitude = matchedLatitude, Longitude = matchedLongitude, Placename = placename };
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		static private void StoreDataForKey(string key, string data)
         {
             if (String.IsNullOrWhiteSpace(data))
             {
@@ -195,7 +221,7 @@ namespace OpenStreetMapCache.Lookup
         }
     }
 
-    class StoredPlacename
+    public class StoredPlacename
     {
         public string GeoLocation { get; set; }
         public string Placename { get; set; }

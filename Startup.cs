@@ -6,6 +6,7 @@ using Nancy.Hosting.Self;
 using System.Net.Sockets;
 using NLog;
 using System.Threading;
+using OpenStreetMapCache.Lookup;
 
 namespace OpenStreetMapCache
 {
@@ -16,25 +17,39 @@ namespace OpenStreetMapCache
         public static void Main()
         {
             ConsoleApplication.RunProgram<CommandLineArguments>(Run);
-        }
+		}
 
         static public void Run(CommandLineArguments args)
         {
             var f = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
             var version = String.Format("{0}.{1}.{2}.{3}", f.ProductMajorPart, f.ProductMinorPart, f.ProductBuildPart, f.ProductPrivatePart);
 
-            var url = new Uri("http://localhost:2000");
+			if (String.IsNullOrWhiteSpace(args.ElasticSearchHost))
+			{
+				logger.Error("The ElasticSearch host must be set, use -e");
+				return;
+			}
+
+			PersistentLookupProvider.ElasticSearchHost = args.ElasticSearchHost;
+			PersistentLookupProvider.Initialize();
+
+			var url = new Uri("http://localhost:2000");
             using (var nancyHost = new NancyHost(url))
             {
-                try
-                {
-                    nancyHost.Start();
-                }
-                catch (SocketException e)
-                {
-                    logger.Info("Failed starting web service {0}: {1}", e.SocketErrorCode, e.Message);
-                    return;
-                }
+				try
+				{
+					nancyHost.Start();
+				}
+				catch (SocketException e)
+				{
+					logger.Info("Failed starting web service {0}: {1}", e.SocketErrorCode, e.Message);
+					return;
+				}
+				catch (Exception ex)
+				{
+					logger.Info("Failed starting web service {0}", ex.Message);
+					return;
+				}
 
                 logger.Info("OpenStreetMapCache {1} listening at {0}", url, version);
 
